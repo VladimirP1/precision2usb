@@ -141,7 +141,7 @@ static void
 __local_ram(uint8_t **start, uint8_t **end)
 {
     *start = &_ebss;
-    *end = *start + 1024 * 25;//(uint8_t *)(&_stack - MAX_STACK_SIZE);
+    *end = *start + 1024 * 5;//(uint8_t *)(&_stack - MAX_STACK_SIZE);
 }
 
 

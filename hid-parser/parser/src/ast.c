@@ -3,27 +3,42 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <FreeRTOS.h>
+#include <assert.h>
+
 
 ast_node* ast_alloc() {
-    ast_node* curNode = malloc(sizeof(ast_node));
+    ast_node* curNode = pvPortMalloc(sizeof(ast_node));
     curNode->type = NODE_COLLECTION;
     curNode->parent = NULL;
     curNode->data.collection.size = 0;
     curNode->data.collection.usage = 0;
-    curNode->data.collection.children = NULL;
+    curNode->data.collection.children = 0;
     return curNode;
 }
 
 ast_node* ast_add_child(ast_node* node, enum ast_node_t type) {
-    ast_node* newnode = malloc(sizeof (ast_node));
+    ast_node* newnode = pvPortMalloc(sizeof (ast_node));
+    assert(newnode);
     newnode->parent = node;
-    node->data.collection.size++;
-    node->data.collection.children =
-            realloc(
-                node->data.collection.children,
-                sizeof(ast_node*) * node->data.collection.size
-            );
-    node->data.collection.children[node->data.collection.size  - 1] = newnode;
+    ast_collection* C = &node->data.collection;
+
+    C->size++;
+
+    if (C->size != 0) {
+        void* oldBuf = C->children;
+
+        C->children = pvPortMalloc(sizeof(ast_node*) * C->size);
+        assert(C->children != NULL);
+
+        memcpy(C->children, oldBuf, sizeof(ast_node*) * (C->size - 1));
+        free(oldBuf);
+    } else {
+        C->children = pvPortMalloc(sizeof(ast_node*) * C->size);
+        assert(C->children != NULL);
+    }
+
+    C->children[C->size  - 1] = newnode;
     newnode->type = type;
     switch(type) {
         case NODE_COLLECTION:
@@ -50,21 +65,21 @@ void ast_free(ast_node* root) {
             ast_free(root->data.collection.children[i]);
         }
         if (root->data.collection.children) {
-            free(root->data.collection.children);
+            vPortFree(root->data.collection.children);
         }
     } break;
     case NODE_FIND_RESULT: {
         for (uint32_t i = 0; i < root->data.collection.size; ++i) {
-            free(root->data.collection.children[i]);
+            vPortFree(root->data.collection.children[i]);
         }
         if (root->data.collection.children) {
-            free(root->data.collection.children);
+            vPortFree(root->data.collection.children);
         }
     } break;
     default: break;
     }
 
-    free(root);
+    vPortFree(root);
 }
 
 static void _ast_print(ast_node* node, uint32_t indent_level) {

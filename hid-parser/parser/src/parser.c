@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "parser.h"
 #include "util.h"
-
+#include <FreeRTOS.h>
 
 void parser_init(parser_state* S) {
     *S = (parser_state) {
@@ -17,7 +17,7 @@ void parser_init(parser_state* S) {
 
     S->curNode = S->rootNode;
 
-    S->globalState = malloc(sizeof (parser_state_global));
+    S->globalState = pvPortMalloc(sizeof (parser_state_global));
 
     *S->globalState = (parser_state_global) {
         .reportId = 0,
@@ -34,12 +34,12 @@ void parser_deinit(parser_state* S) {
     while(S->globalState) {
         void* cur = S->globalState;
         S->globalState = S->globalState->next;
-        free(cur);
+        vPortFree(cur);
     }
 }
 
 static void global_state_push(parser_state* S) {
-    parser_state_global *newstate = malloc(sizeof(parser_state_global));
+    parser_state_global *newstate = pvPortMalloc(sizeof(parser_state_global));
     newstate->next = S->globalState;
     S->globalState = newstate;
 }
@@ -47,7 +47,7 @@ static void global_state_push(parser_state* S) {
 static void global_state_pop(parser_state* S) {
     parser_state_global* oldstate = S->globalState;
     S->globalState = S->globalState->next;
-    free(oldstate);
+    vPortFree(oldstate);
 }
 
 static void set_usages(parser_state* S) {

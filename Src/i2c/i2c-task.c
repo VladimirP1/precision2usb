@@ -126,7 +126,7 @@ void i2c_task(void* arg) {
 	precState.inputMode.mode = 3;
 	update_device(movers.input_mode_report_id, movers.input_mode_report_len/8, &movers.input_mode, &precState.inputMode);
 
-	command* cmd = malloc(256);
+	command* cmd = pvPortMalloc(256);
 	xSemaphoreGive(sem_alert);
 	while(1) {
 		xSemaphoreTake(sem_alert, portMAX_DELAY);
