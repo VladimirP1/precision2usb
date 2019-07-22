@@ -44,8 +44,8 @@ static usbd_device *usbd_dev;
 static SemaphoreHandle_t cdc_tx_semaphore;
 static SemaphoreHandle_t cdc_rx_semaphore;
 static SemaphoreHandle_t hid_input_semaphore;
-static StreamBufferHandle_t* cdc_tx_buf;
-static StreamBufferHandle_t* cdc_rx_buf;
+static StreamBufferHandle_t cdc_tx_buf;
+static StreamBufferHandle_t cdc_rx_buf;
 
 const struct usb_device_descriptor dev_descr = {
 		.bLength = USB_DT_DEVICE_SIZE,
@@ -413,7 +413,7 @@ static void cdcacm_data_rx_task(void* arg) {
 		cm_enable_interrupts();
 
 		if (len) {
-			xStreamBufferSend(*cdc_rx_buf, buf, len, portMAX_DELAY);
+			xStreamBufferSend(cdc_rx_buf, buf, len, portMAX_DELAY);
 		}
 	}
 }
@@ -425,7 +425,7 @@ static void cdcacm_data_tx_task(void* arg) {
 	xSemaphoreGive(cdc_tx_semaphore);
 
 	while (1) {
-		size_t len = xStreamBufferReceive(*cdc_tx_buf, buf, 64, portMAX_DELAY);
+		size_t len = xStreamBufferReceive(cdc_tx_buf, buf, 64, portMAX_DELAY);
 
 		xSemaphoreTake(cdc_tx_semaphore, 128);
 
@@ -534,11 +534,11 @@ void hid_service_task(void* arg) {
 }
 
 size_t cdcacm_write(char const* buf, size_t len) {
-	return xStreamBufferSend(*cdc_tx_buf, buf, len, portMAX_DELAY);
+	return xStreamBufferSend(cdc_tx_buf, buf, len, portMAX_DELAY);
 }
 
 size_t cdcacm_read(char * buf, size_t len) {
-	return xStreamBufferReceive(*cdc_rx_buf, buf, len, portMAX_DELAY);
+	return xStreamBufferReceive(cdc_rx_buf, buf, len, portMAX_DELAY);
 }
 
 static void hid_set_config(usbd_device *dev, uint16_t wValue)
@@ -588,10 +588,8 @@ void usb_init()
 		__asm__("nop");
 	}
 
-	cdc_rx_buf = pvPortMalloc(sizeof(StreamBufferHandle_t));
-	cdc_tx_buf = pvPortMalloc(sizeof(StreamBufferHandle_t));
-	*cdc_rx_buf = xStreamBufferCreate(128, 0);
-	*cdc_tx_buf = xStreamBufferCreate(128, 0);
+	cdc_rx_buf = xStreamBufferCreate(128, 0);
+	cdc_tx_buf = xStreamBufferCreate(128, 0);
 	cdc_tx_semaphore = xSemaphoreCreateBinary();
 	cdc_rx_semaphore = xSemaphoreCreateBinary();
 	hid_input_semaphore = xSemaphoreCreateBinary();

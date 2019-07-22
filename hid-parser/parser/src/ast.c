@@ -32,7 +32,7 @@ ast_node* ast_add_child(ast_node* node, enum ast_node_t type) {
         assert(C->children != NULL);
 
         memcpy(C->children, oldBuf, sizeof(ast_node*) * (C->size - 1));
-        free(oldBuf);
+        vPortFree(oldBuf);
     } else {
         C->children = pvPortMalloc(sizeof(ast_node*) * C->size);
         assert(C->children != NULL);

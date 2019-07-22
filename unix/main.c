@@ -23,7 +23,7 @@ static void parse_report_desc(uint8_t* buf, size_t len, prec_config* movers) {
 int main() {
 
     size_t len = 0;
-    uint8_t* data = read_all("/home/vladimir/Experiments/Usb/elan/elan.bin", &len);
+    uint8_t* data = read_all("/home/vladimir/Experiments/Usb/xps15_desc/xps15.bin", &len);
 
     prec_config cfg;
     memset(&cfg, 0, sizeof(cfg));

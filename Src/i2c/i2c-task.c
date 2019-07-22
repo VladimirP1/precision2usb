@@ -11,7 +11,7 @@
 #include <libopencm3/cm3/cortex.h>
 
 hid_dev_desc device_desc;
-static uint8_t buf[1024];
+uint8_t buf[1024];
 prec_state precState;
 prec_config movers;
 
@@ -24,7 +24,7 @@ void parse_report_desc(uint8_t* buf, size_t len) {
 	while(!token_next(&tS, &tok)) {
 		parser_token(&pS, &tok);
 	}
-	//ast_print(pS.rootNode);
+	ast_print(pS.rootNode);
 	prec_init_from_ast(pS.rootNode, &movers);
 	parser_deinit(&pS);
 }
@@ -54,8 +54,8 @@ static int update_state(prec_state* S, prec_config* C, uint8_t* report, uint16_t
 }
 
 static int update_device(uint8_t id, uint16_t len, bitmover_data* mv, void* src) {
-	buf[0] = id;
 	memset(buf, 0, len + 1);
+	buf[0] = id;
 	bitmover_move_rev(mv, buf + 1, src);
 	uint8_t status = i2c_cmd_set_report(0x2c,  device_desc.wCommandRegister, device_desc.wDataRegister, buf, len + 1);
 	if (status) {
