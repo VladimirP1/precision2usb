@@ -366,7 +366,7 @@ static enum usbd_request_return_codes cdcacm_control_request(usbd_device *usbd_d
 		notif->wLength = 2;
 		local_buf[8] = req->wValue & 3;
 		local_buf[9] = 0;
-		// usbd_ep_write_packet(0x83, buf, 10);
+
 		return USBD_REQ_HANDLED;
 		}
 	case USB_CDC_REQ_SET_LINE_CODING:
@@ -526,16 +526,6 @@ void hid_service_task(void* arg) {
 			} break;
 			default: break;
 		}
-
-
-		/*cm_disable_interrupts();
-		uint16_t ret = usbd_ep_write_packet(usbd_dev, 0x81, buf, len);
-		cm_enable_interrupts();
-
-		if (!ret) {
-			// In case of an error, just ignore it
-			xSemaphoreGive(hid_input_semaphore);
-		}*/
 	}
 }
 
