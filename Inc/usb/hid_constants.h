@@ -8,6 +8,35 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+static const uint8_t hid_report_descriptor2[] = {
+	    0x05, 0x01,                         // USAGE_PAGE (Generic Desktop)     0
+	    0x09, 0x02,                         // USAGE (Mouse)                    2
+	    0xa1, 0x01,                         // COLLECTION (Application)         4
+	    0x85, 1,                            //   REPORT_ID (Mouse)              6
+	    0x09, 0x01,                         //   USAGE (Pointer)                8
+	    0xa1, 0x00,                         //   COLLECTION (Physical)          10
+	    0x05, 0x09,                         //     USAGE_PAGE (Button)          12
+	    0x19, 0x01,                         //     USAGE_MINIMUM (Button 1)     14
+	    0x29, 0x02,                         //     USAGE_MAXIMUM (Button 2)     16
+	    0x15, 0x00,                         //     LOGICAL_MINIMUM (0)          18
+	    0x25, 0x01,                         //     LOGICAL_MAXIMUM (1)          20
+	    0x75, 0x01,                         //     REPORT_SIZE (1)              22
+	    0x95, 0x02,                         //     REPORT_COUNT (2)             24
+	    0x81, 0x02,                         //     INPUT (Data,Var,Abs)         26
+	    0x95, 0x06,                         //     REPORT_COUNT (6)             28
+	    0x81, 0x03,                         //     INPUT (Cnst,Var,Abs)         30
+	    0x05, 0x01,                         //     USAGE_PAGE (Generic Desktop) 32
+	    0x09, 0x30,                         //     USAGE (X)                    34
+	    0x09, 0x31,                         //     USAGE (Y)                    36
+	    0x15, 0x81,                         //     LOGICAL_MINIMUM (-127)       38
+	    0x25, 0x7f,                         //     LOGICAL_MAXIMUM (127)        40
+	    0x75, 0x08,                         //     REPORT_SIZE (8)              42
+	    0x95, 0x02,                         //     REPORT_COUNT (2)             44
+	    0x81, 0x06,                         //     INPUT (Data,Var,Rel)         46
+	    0xc0,                               //   END_COLLECTION                 48
+	    0xc0                                // END_COLLECTION                   49/50
+};
+
 static const uint8_t hid_report_descriptor[] = {
 		0x05, 0x01,                     /*  Usage Page (Desktop),                   */
 		0x09, 0x02,                     /*  Usage (Mouse),                          */
@@ -96,18 +125,17 @@ static const uint8_t hid_report_descriptor[] = {
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xE2, 0x0C,               /*          Logical Maximum (3298),         */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
 		0x75, 0x10,                     /*          Report Size (16),               */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x13,                     /*          Unit (Inch),                    */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0xA3, 0x01,               /*          Physical Maximum (419),         */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0xF6, 0x00,               /*          Physical Maximum (246),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
+		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
+		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
@@ -115,7 +143,6 @@ static const uint8_t hid_report_descriptor[] = {
 		0x25, 0x64,                     /*          Logical Maximum (100),          */
 		0x95, 0x03,                     /*          Report Count (3),               */
 		0xC0,                           /*      End Collection,                     */
-		0x09, 0x22,                     /*      Usage (Finger),                     */
 		0xA1, 0x02,                     /*      Collection (Logical),               */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
 		0x25, 0x01,                     /*          Logical Maximum (1),            */
@@ -134,18 +161,17 @@ static const uint8_t hid_report_descriptor[] = {
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xE2, 0x0C,               /*          Logical Maximum (3298),         */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
 		0x75, 0x10,                     /*          Report Size (16),               */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x13,                     /*          Unit (Inch),                    */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0xA3, 0x01,               /*          Physical Maximum (419),         */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0xF6, 0x00,               /*          Physical Maximum (246),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
+		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
+		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
@@ -153,7 +179,6 @@ static const uint8_t hid_report_descriptor[] = {
 		0x25, 0x64,                     /*          Logical Maximum (100),          */
 		0x95, 0x03,                     /*          Report Count (3),               */
 		0xC0,                           /*      End Collection,                     */
-		0x09, 0x22,                     /*      Usage (Finger),                     */
 		0xA1, 0x02,                     /*      Collection (Logical),               */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
 		0x25, 0x01,                     /*          Logical Maximum (1),            */
@@ -172,18 +197,17 @@ static const uint8_t hid_report_descriptor[] = {
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xE2, 0x0C,               /*          Logical Maximum (3298),         */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
 		0x75, 0x10,                     /*          Report Size (16),               */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x13,                     /*          Unit (Inch),                    */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0xA3, 0x01,               /*          Physical Maximum (419),         */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0xF6, 0x00,               /*          Physical Maximum (246),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
+		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
+		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
@@ -191,7 +215,6 @@ static const uint8_t hid_report_descriptor[] = {
 		0x25, 0x64,                     /*          Logical Maximum (100),          */
 		0x95, 0x03,                     /*          Report Count (3),               */
 		0xC0,                           /*      End Collection,                     */
-		0x09, 0x22,                     /*      Usage (Finger),                     */
 		0xA1, 0x02,                     /*      Collection (Logical),               */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
 		0x25, 0x01,                     /*          Logical Maximum (1),            */
@@ -210,18 +233,17 @@ static const uint8_t hid_report_descriptor[] = {
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xE2, 0x0C,               /*          Logical Maximum (3298),         */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
 		0x75, 0x10,                     /*          Report Size (16),               */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x13,                     /*          Unit (Inch),                    */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0xA3, 0x01,               /*          Physical Maximum (419),         */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0xF6, 0x00,               /*          Physical Maximum (246),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
+		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
+		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
@@ -229,7 +251,6 @@ static const uint8_t hid_report_descriptor[] = {
 		0x25, 0x64,                     /*          Logical Maximum (100),          */
 		0x95, 0x03,                     /*          Report Count (3),               */
 		0xC0,                           /*      End Collection,                     */
-		0x09, 0x22,                     /*      Usage (Finger),                     */
 		0xA1, 0x02,                     /*      Collection (Logical),               */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
 		0x25, 0x01,                     /*          Logical Maximum (1),            */
@@ -248,18 +269,17 @@ static const uint8_t hid_report_descriptor[] = {
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xE2, 0x0C,               /*          Logical Maximum (3298),         */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
 		0x75, 0x10,                     /*          Report Size (16),               */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x13,                     /*          Unit (Inch),                    */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0xA3, 0x01,               /*          Physical Maximum (419),         */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0xF6, 0x00,               /*          Physical Maximum (246),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
-		0x26, 0xB5, 0x07,               /*          Logical Maximum (1973),         */
+		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
+		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */

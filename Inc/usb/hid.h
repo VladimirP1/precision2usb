@@ -10,7 +10,7 @@ struct precision_report {
 	  uint8_t contId : 4;
 	  uint16_t X : 16;
 	  uint16_t Y : 16;
-  } fingers[5];
+  } __attribute__((packed)) fingers[5];
   uint16_t time : 16;
   uint8_t contactCnt : 8;
   uint8_t btn : 1;

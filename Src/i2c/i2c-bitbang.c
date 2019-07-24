@@ -149,19 +149,22 @@ void exti15_10_isr() {
 	exti_reset_request(EXTI12);
 	BaseType_t hp_task_woken = pdFALSE;
 	xSemaphoreGiveFromISR(sem_alert, &hp_task_woken);
+	if (hp_task_woken) {
+		taskYIELD();
+	}
 }
 
 /* I2C hid specific commands */
 static uint8_t static_buf[128];
 
 uint8_t i2c_read_reg(uint8_t adr, uint16_t reg, void* buf, uint16_t len) {
-	printf("--------------------\n\r");
+//	printf("--------------------\n\r");
 	int status = i2c_transfer(adr, (uint8_t*) &reg, 2, (uint8_t*) buf, len);
-	printf("Status: %d\r\n", status);
-	for(int i = 0; i < 30; ++i) {
-		printf("%02x ", ((uint8_t*)buf)[i]);
-	}
-	printf("\r\n");
+//	printf("Status: %d\r\n", status);
+//	for(int i = 0; i < 30; ++i) {
+//		printf("%02x ", ((uint8_t*)buf)[i]);
+//	}
+//	printf("\r\n");
 	return status;
 }
 

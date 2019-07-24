@@ -201,7 +201,7 @@ const struct usb_endpoint_descriptor hid_endpoint = {
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x81,
 		.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
-		.wMaxPacketSize = 30,
+		.wMaxPacketSize = 64,
 		.bInterval = 0x01,
 };
 
@@ -322,6 +322,12 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 
 	// Input mode
 	if ((req->bRequest == 0x09) && (req->wValue == 0x0303)) {
+		uint8_t _cmd[sizeof(command) + 8];
+		command* cmd = (command*) _cmd;
+		cmd->cmdType = CMD_FEATURE_INPUT_MODE;
+		((prec_input_mode_report*)&cmd->data)->mode = buf[1];
+		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_input_mode_report) + sizeof(cmd_type), 0);
+
 		rptMode = buf[1] != 0;
 		return USBD_REQ_HANDLED;
 	}
@@ -547,7 +553,7 @@ static void hid_set_config(usbd_device *dev, uint16_t wValue)
 	(void)dev;
 
 	// HID
-	usbd_ep_setup(dev, 0x81, USB_ENDPOINT_ATTR_INTERRUPT, 30, hid_input_ok);
+	usbd_ep_setup(dev, 0x81, USB_ENDPOINT_ATTR_INTERRUPT, 64, hid_input_ok);
 
 	usbd_register_control_callback(
 					dev,
@@ -606,7 +612,7 @@ void usb_init()
 
 	xTaskCreate(cdcacm_data_tx_task, "cdc_send", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 	xTaskCreate(cdcacm_data_rx_task, "cdc_rcv", 100, NULL, configMAX_PRIORITIES - 1, NULL);
-	//xTaskCreate(hid_service_task, "hid_service", 100, NULL, configMAX_PRIORITIES - 1, NULL);
+	xTaskCreate(hid_service_task, "hid_service", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 }
 
 void usb_wakeup_isr()

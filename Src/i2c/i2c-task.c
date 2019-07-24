@@ -3,12 +3,14 @@
 #include "parser.h"
 #include "tokenizer.h"
 #include "precision.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <io.h>
 #include <message_buffer.h>
 #include <libopencm3/cm3/cortex.h>
+#include <libopencm3/stm32/gpio.h>
 
 hid_dev_desc device_desc;
 uint8_t buf[1024];
@@ -24,7 +26,7 @@ void parse_report_desc(uint8_t* buf, size_t len) {
 	while(!token_next(&tS, &tok)) {
 		parser_token(&pS, &tok);
 	}
-	ast_print(pS.rootNode);
+	//ast_print(pS.rootNode);
 	prec_init_from_ast(pS.rootNode, &movers);
 	parser_deinit(&pS);
 }
@@ -58,18 +60,14 @@ static int update_device(uint8_t id, uint16_t len, bitmover_data* mv, void* src)
 	buf[0] = id;
 	bitmover_move_rev(mv, buf + 1, src);
 	uint8_t status = i2c_cmd_set_report(0x2c,  device_desc.wCommandRegister, device_desc.wDataRegister, buf, len + 1);
-	if (status) {
-		//printf("Error setting report\r\n");
-	}
+	assert(!status);
 	return 0;
 }
 
 static void get_report(uint8_t id) {
 	uint16_t len = (uint16_t) sizeof(buf);
 	uint8_t status = i2c_cmd_get_report(0x2c,  device_desc.wCommandRegister, device_desc.wDataRegister, id, buf, &len);
-	if (status) {
-		//printf("Error getting report\r\n");
-	}
+	assert(!status);
 	update_state(&precState, &movers, buf + 2, len - 2);
 	//printf("id=%d, len=%d\r\n", id, len);
 }
@@ -86,20 +84,24 @@ static void get_report_input() {
 
 	precState.wasPrecision = buf[2] == movers.prec_report_id;
 
-	prec_report_info nfo;
-	bitmover_move(&movers.digitizer, rptBuf, &nfo);
+	if (precState.wasPrecision) {
+		prec_report_info nfo;
+		bitmover_move(&movers.digitizer, rptBuf, &nfo);
 
-	if (nfo.contactCount != 0) {
-		precState.input.info = nfo;
-		fingTotal = nfo.contactCount;
-		fingIdx = 0;
-	}
+		if (nfo.contactCount != 0) {
+			precState.input.info = nfo;
+			fingTotal = nfo.contactCount;
+			fingIdx = 0;
+		}
 
-	uint8_t fingLeft = fingTotal - fingIdx;
-	fingLeft = movers.fingerCount > fingLeft ? fingLeft : movers.fingerCount;
+		uint8_t fingLeft = fingTotal - fingIdx;
+		fingLeft = movers.fingerCount > fingLeft ? fingLeft : movers.fingerCount;
 
-	for (uint8_t i = 0; i < fingLeft; ++i) {
-		bitmover_move(&movers.finger[i], rptBuf, &precState.input.fingers[fingIdx++]);
+		for (uint8_t i = 0; i < fingLeft; ++i) {
+			bitmover_move(&movers.finger[i], rptBuf, &precState.input.fingers[fingIdx++]);
+		}
+	} else {
+		bitmover_move(&movers.mouse, rptBuf, &precState.mouse);
 	}
 }
 
@@ -110,7 +112,7 @@ void i2c_task(void* arg) {
 
 	i2c_init();
 	int_init();
-	cdcacm_read((char*)buf, 1);
+	//cdcacm_read((char*)buf, 1);
 	i2c_recover();
 	i2c_recover();
 	vTaskDelay(10);
@@ -122,14 +124,20 @@ void i2c_task(void* arg) {
 	status = i2c_read_reg(0x2c, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);
 
+	usb_init();
+
 	get_report(movers.caps_report_id);
-	precState.inputMode.mode = 3;
-	update_device(movers.input_mode_report_id, movers.input_mode_report_len/8, &movers.input_mode, &precState.inputMode);
+	//precState.inputMode.mode = 3;
+	//update_device(movers.input_mode_report_id, movers.input_mode_report_len/8, &movers.input_mode, &precState.inputMode);
 
 	command* cmd = pvPortMalloc(256);
 	xSemaphoreGive(sem_alert);
 	while(1) {
 		xSemaphoreTake(sem_alert, portMAX_DELAY);
+
+		if (gpio_get(GPIOB, GPIO12)) {
+			continue;
+		}
 
 		/* check for input report and send to usb task */
 		get_report_input();
@@ -140,10 +148,10 @@ void i2c_task(void* arg) {
 			cmd->cmdType = CMD_INPUT_MOUSE;
 			memcpy(cmd->data, &precState.mouse, sizeof(prec_mouse_report));
 		}
-		xMessageBufferSend(publicInterface.toHostReportBuf, &cmd, 256, 0);
+		xMessageBufferSend(publicInterface.toHostReportBuf, cmd, sizeof(prec_report) + sizeof(cmd_type), 0);
 
 		/* check for incoming feature reports from usb task */
-		size_t bytes = xMessageBufferReceive(publicInterface.toDeviceReportBuf, &cmd, 256, 0);
+		size_t bytes = xMessageBufferReceive(publicInterface.toDeviceReportBuf, cmd, 256, 0);
 		if (!bytes) {
 			continue;
 		}
