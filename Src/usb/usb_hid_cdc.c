@@ -46,6 +46,7 @@ static SemaphoreHandle_t cdc_rx_semaphore;
 static SemaphoreHandle_t hid_input_semaphore;
 static StreamBufferHandle_t cdc_tx_buf;
 static StreamBufferHandle_t cdc_rx_buf;
+static bool usb_ready = false;
 
 const struct usb_device_descriptor dev_descr = {
 		.bLength = USB_DT_DEVICE_SIZE,
@@ -322,10 +323,11 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 
 	// Input mode
 	if ((req->bRequest == 0x09) && (req->wValue == 0x0303)) {
-		uint8_t _cmd[sizeof(command) + 8];
+		uint8_t _cmd[sizeof(prec_input_mode_report) + sizeof(cmd_type)];
 		command* cmd = (command*) _cmd;
+
 		cmd->cmdType = CMD_FEATURE_INPUT_MODE;
-		((prec_input_mode_report*)&cmd->data)->mode = buf[1];
+		((prec_input_mode_report*)cmd->data)->mode = buf[1];
 		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_input_mode_report) + sizeof(cmd_type), 0);
 
 		rptMode = buf[1] != 0;
@@ -540,11 +542,17 @@ void hid_service_task(void* arg) {
 }
 
 size_t cdcacm_write(char const* buf, size_t len) {
-	return xStreamBufferSend(cdc_tx_buf, buf, len, portMAX_DELAY);
+	if (usb_ready) {
+		return xStreamBufferSend(cdc_tx_buf, buf, len, portMAX_DELAY);
+	}
+	return 0;
 }
 
 size_t cdcacm_read(char * buf, size_t len) {
-	return xStreamBufferReceive(cdc_rx_buf, buf, len, portMAX_DELAY);
+	if (usb_ready) {
+		return xStreamBufferReceive(cdc_rx_buf, buf, len, portMAX_DELAY);
+	}
+	return 0;
 }
 
 static void hid_set_config(usbd_device *dev, uint16_t wValue)
@@ -613,6 +621,8 @@ void usb_init()
 	xTaskCreate(cdcacm_data_tx_task, "cdc_send", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 	xTaskCreate(cdcacm_data_rx_task, "cdc_rcv", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 	xTaskCreate(hid_service_task, "hid_service", 100, NULL, configMAX_PRIORITIES - 1, NULL);
+
+	usb_ready = true;
 }
 
 void usb_wakeup_isr()
