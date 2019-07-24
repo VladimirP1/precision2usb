@@ -290,8 +290,7 @@ static enum usbd_request_return_codes hid_control_request(usbd_device *dev, stru
 	return USBD_REQ_NOTSUPP;
 }
 
-uint8_t report[257];
-uint8_t rptMode = 0;
+static uint8_t precision_feature_rpt[2];
 static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev, struct usb_setup_data *req, uint8_t **buf, uint16_t *len,
 			void (**complete)(usbd_device *, struct usb_setup_data *))
 {
@@ -300,10 +299,10 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 
 	// Device capabilities
 	if ((req->bRequest == 0x01) && (req->wValue == 0x0302)) {
-		report[0] = 2;
-		report[1] = 0x15;
-		*buf = report;
-		*len = sizeof(report);
+		precision_feature_rpt[0] = 2;
+		precision_feature_rpt[1] = 0x15;
+		*buf = precision_feature_rpt;
+		*len = 2;
 
 		return USBD_REQ_HANDLED;
 	}
@@ -330,7 +329,6 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 		((prec_input_mode_report*)cmd->data)->mode = buf[1];
 		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_input_mode_report) + sizeof(cmd_type), 0);
 
-		rptMode = buf[1] != 0;
 		return USBD_REQ_HANDLED;
 	}
 
