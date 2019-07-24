@@ -18,7 +18,7 @@ uint8_t buf[1024];
 prec_state precState;
 static prec_config movers;
 
-void parse_report_desc(uint8_t* buf, size_t len) {
+static void parse_report_desc(uint8_t* buf, size_t len) {
 	token tok;
 	tokenizer_state tS;
 	parser_state pS;

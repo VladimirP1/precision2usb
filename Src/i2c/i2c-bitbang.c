@@ -158,14 +158,7 @@ void exti15_10_isr() {
 static uint8_t static_buf[128];
 
 uint8_t i2c_read_reg(uint8_t adr, uint16_t reg, void* buf, uint16_t len) {
-//	printf("--------------------\n\r");
-	int status = i2c_transfer(adr, (uint8_t*) &reg, 2, (uint8_t*) buf, len);
-//	printf("Status: %d\r\n", status);
-//	for(int i = 0; i < 30; ++i) {
-//		printf("%02x ", ((uint8_t*)buf)[i]);
-//	}
-//	printf("\r\n");
-	return status;
+	return i2c_transfer(adr, (uint8_t*) &reg, 2, (uint8_t*) buf, len);
 }
 
 uint8_t i2c_write_reg(uint8_t adr, uint16_t reg, void* buf, uint16_t len) {
