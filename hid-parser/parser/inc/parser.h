@@ -27,6 +27,13 @@ struct parser_state_global {
     int16_t reportSize;
     int16_t reportCount;
     uint32_t usagePage;
+    int32_t logicalMinimum;
+    int32_t logicalMaximum;
+    bool physicalDefined;
+    int32_t physicalMinimum;
+    int32_t physicalMaximum;
+    int8_t unitExponent;
+    enum unit unit;
     parser_state_global* next;
 };
 

@@ -21,6 +21,15 @@ enum ast_report_type {
     REPORT_FEATURE
 };
 
+/*
+ * We support only linear units,
+ * as noting else is needed for touchpads.
+ */
+enum unit {
+	UNIT_CM = 1,
+	UNIT_INCH = 3,
+};
+
 struct ast_collection {
     uint16_t size;
     uint8_t type;
@@ -34,6 +43,10 @@ struct ast_report {
     uint16_t size;
     uint16_t count;
     uint32_t usage;
+    enum unit unit;
+    int32_t physMax, physMin;
+    int32_t logMin, logMax;
+    int8_t unitExpo;
     enum ast_report_type type;
 };
 

@@ -140,6 +140,23 @@ int prec_init_from_ast(ast_node* root, prec_config *movers) {
 
             fill_mover(&movers->finger[i], fingers->children[i], map, 5);
             assert(movers->finger[i].count == 5);
+
+            /* Now get the units */
+            {
+            	ast_collection* fingColl = &fingers->children[i]->data.collection;
+            	for (int i = 0; i < fingColl->size; ++i) {
+            		if (fingColl->children[i]->type == NODE_REPORT_FIELD && fingColl->children[i]->data.report.usage == 0x010030) {
+            			ast_report* rpt = &fingColl->children[i]->data.report;
+            			movers->physicalMaximum = rpt->physMax;
+            			movers->physicalMinimum = rpt->physMin;
+            			movers->logicalMaximum = rpt->logMax;
+            			movers->logicalMinimum = rpt->logMin;
+            			movers->unit = rpt->unit;
+            			movers->unitExponent = rpt->unitExpo;
+            		}
+            	}
+            	assert(movers->unit);
+            }
         }
         ast_free(_fingers);
     }

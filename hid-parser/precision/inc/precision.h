@@ -102,6 +102,13 @@ struct prec_config {
     uint8_t mouse_report_id;
     uint16_t mouse_report_len;
     bitmover_data mouse;
+    // Other info
+    int32_t logicalMinimum;
+    int32_t logicalMaximum;
+    int32_t physicalMinimum;
+    int32_t physicalMaximum;
+    int8_t unitExponent;
+    enum unit unit;
 };
 
 //extern prec_config movers;

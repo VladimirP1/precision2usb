@@ -24,6 +24,13 @@ void parser_init(parser_state* S) {
         .reportSize = 0,
         .reportCount = 0,
         .usagePage = 0,
+	    .logicalMinimum = 0,
+	    .logicalMaximum = 0,
+		.physicalDefined = 0,
+	    .physicalMinimum = 0,
+	    .physicalMaximum = 0,
+	    .unitExponent = 0,
+	    .unit = UNIT_CM,
         .next = NULL,
     };
 
@@ -61,6 +68,22 @@ static void set_usages(parser_state* S) {
     }
 }
 
+static void set_physical(parser_state* S, ast_report* rpt) {
+    parser_state_global* G = S->globalState;
+	int32_t physmax = G->physicalMaximum, physmin = G->physicalMinimum;
+    if ((!G->physicalDefined) || (G->physicalMaximum == 0 && G->physicalMinimum == 0)) {
+    	physmax = G->logicalMaximum;
+    	physmin = G->logicalMinimum;
+	}
+
+	rpt->unit = G->unit;
+	rpt->unitExpo = G->unitExponent;
+	rpt->physMax = physmax;
+	rpt->physMin = physmin;
+	rpt->logMax = G->logicalMaximum;
+	rpt->logMin = G->logicalMinimum;
+}
+
 static void add_rpts(parser_state* S, enum ast_report_type t) {
     parser_state_global* G = S->globalState;
     set_usages(S);
@@ -89,6 +112,7 @@ static void add_rpts(parser_state* S, enum ast_report_type t) {
             rpt->usage = S->usage[i % S->usageCount];
             rpt->count = S->usageCount == 1 ? (uint16_t) G->reportCount : 1;
             rpt->type = t;
+            set_physical(S, rpt);
             dbg_printf("    Usage: %04X\r\n", S->usage[i]);
         }
     }
@@ -137,16 +161,35 @@ int parser_token(parser_state* S, token* tok) {
                 memcpy((uint8_t*)&G->usagePage, tok->data, tok->size);
                 break;
             case TAG_GLOBAL_LOGICAL_MINIMUM:
+            	assert(tok->size <= 4);
+				G->logicalMinimum = 0;
+				memcpy(&G->logicalMinimum, tok->data, tok->size);
                 break;
             case TAG_GLOBAL_LOGICAL_MAXIMUM:
+            	assert(tok->size <= 4);
+				G->logicalMaximum = 0;
+				memcpy(&G->logicalMaximum, tok->data, tok->size);
                 break;
             case TAG_GLOBAL_PHYSICAL_MINIMUM:
+            	assert(tok->size <= 4);
+            	G->physicalDefined = true;
+				G->physicalMinimum = 0;
+				memcpy(&G->physicalMinimum, tok->data, tok->size);
                 break;
             case TAG_GLOBAL_PHYSICAL_MAXIMUM:
+            	assert(tok->size <= 4);
+            	G->physicalDefined = true;
+				G->physicalMaximum = 0;
+				memcpy(&G->physicalMaximum, tok->data, tok->size);
                 break;
             case TAG_GLOBAL_UNIT_EXPONENT:
+            	assert(tok->size == 1);
+            	uint8_t dt = tok->data[0] & 0xf;
+				G->unitExponent = dt >= 8 ? dt - 16 : dt;
                 break;
             case TAG_GLOBAL_UNIT:
+            	assert(tok->size >= 1);
+            	G->unit = tok->data[tok->size - 1] & 0xf;
                 break;
             case TAG_GLOBAL_REPORT_SIZE:
                 assert(tok->size <= 2);

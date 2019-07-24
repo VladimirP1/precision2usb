@@ -32,7 +32,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libopencm3/include}&quot;"/>
 									<listOptionValue builtIn="false" value="../Inc/rtos"/>
 									<listOptionValue builtIn="false" value="../Inc/boot"/>
-									<listOptionValue builtIn="false" value="../Inc/hid"/>
 									<listOptionValue builtIn="false" value="../Inc/i2c"/>
 									<listOptionValue builtIn="false" value="../hid-parser/parser"/>
 								</option>
@@ -52,7 +51,6 @@
 									<listOptionValue builtIn="false" value="../Inc/rtos"/>
 									<listOptionValue builtIn="false" value="../Inc/usb"/>
 									<listOptionValue builtIn="false" value="../Inc/boot"/>
-									<listOptionValue builtIn="false" value="../Inc/hid"/>
 									<listOptionValue builtIn="false" value="../Inc/termio"/>
 									<listOptionValue builtIn="false" value="../Inc/i2c"/>
 									<listOptionValue builtIn="false" value="../hid-parser/util/inc"/>
@@ -132,7 +130,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libopencm3/include}&quot;"/>
 									<listOptionValue builtIn="false" value="../Inc/rtos"/>
 									<listOptionValue builtIn="false" value="../Inc/boot"/>
-									<listOptionValue builtIn="false" value="../Inc/hid"/>
 									<listOptionValue builtIn="false" value="../Inc/i2c"/>
 									<listOptionValue builtIn="false" value="../hid-parser/parser"/>
 								</option>
@@ -151,7 +148,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libopencm3/include}&quot;"/>
 									<listOptionValue builtIn="false" value="../Inc/rtos"/>
 									<listOptionValue builtIn="false" value="../Inc/boot"/>
-									<listOptionValue builtIn="false" value="../Inc/hid"/>
 									<listOptionValue builtIn="false" value="../Inc/i2c"/>
 									<listOptionValue builtIn="false" value="../hid-parser/parser"/>
 								</option>
