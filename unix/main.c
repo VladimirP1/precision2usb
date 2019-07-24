@@ -3,6 +3,7 @@
 #include <precision.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static void parse_report_desc(uint8_t* buf, size_t len, prec_config* movers) {
 	token tok;
@@ -20,10 +21,14 @@ static void parse_report_desc(uint8_t* buf, size_t len, prec_config* movers) {
 	parser_deinit(&pS);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if(argc != 2) {
+        printf("Usage: main <hid descriptor file>\n");
+        return 1;
+    }
 
     size_t len = 0;
-    uint8_t* data = read_all("/home/vladimir/Experiments/Usb/xps15_desc/xps15.bin", &len);
+    uint8_t* data = read_all(argv[1], &len);
 
     prec_config cfg;
     memset(&cfg, 0, sizeof(cfg));
