@@ -9,13 +9,14 @@
 #include <string.h>
 #include <io.h>
 #include <message_buffer.h>
+#include <usb_hid_cdc.h>
 #include <libopencm3/cm3/cortex.h>
 #include <libopencm3/stm32/gpio.h>
 
 hid_dev_desc device_desc;
 uint8_t buf[1024];
 prec_state precState;
-prec_config movers;
+static prec_config movers;
 
 void parse_report_desc(uint8_t* buf, size_t len) {
 	token tok;
@@ -118,6 +119,7 @@ void i2c_task(void* arg) {
 	vTaskDelay(10);
 
 	int status = i2c_read_reg(0x2c,0x20,&device_desc,30);
+	assert(!status);
 
 	vTaskDelay(10);
 

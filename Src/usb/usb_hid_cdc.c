@@ -326,7 +326,7 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 		command* cmd = (command*) _cmd;
 
 		cmd->cmdType = CMD_FEATURE_INPUT_MODE;
-		((prec_input_mode_report*)cmd->data)->mode = buf[1];
+		((prec_input_mode_report*)cmd->data)->mode = (*buf)[1];
 		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_input_mode_report) + sizeof(cmd_type), 0);
 
 		return USBD_REQ_HANDLED;

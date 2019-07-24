@@ -104,7 +104,7 @@ struct prec_config {
     bitmover_data mouse;
 };
 
-extern prec_config movers;
+//extern prec_config movers;
 
 struct prec_state {
 	bool wasPrecision;
