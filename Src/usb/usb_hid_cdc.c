@@ -449,16 +449,16 @@ static void cdcacm_data_tx_task(void* arg) {
 	while (1) {
 		size_t len = xStreamBufferReceive(cdc_tx_buf, buf, 64, portMAX_DELAY);
 
-		xSemaphoreTake(cdc_tx_semaphore, 128);
+		xSemaphoreTake(cdc_tx_semaphore, 256);
 
 		cm_disable_interrupts();
 		uint16_t ret = usbd_ep_write_packet(usbd_dev, 0x82, buf, len);
 		cm_enable_interrupts();
 
-		if (!ret) {
+		/*if (!ret) {
 			// In case of an error, just ignore it
 			xSemaphoreGive(cdc_tx_semaphore);
-		}
+		}*/
 	}
 }
 

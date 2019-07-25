@@ -114,7 +114,7 @@ void i2c_task(void* arg) {
 
 	i2c_init();
 	int_init();
-	//cdcacm_read((char*)buf, 1);
+
 	i2c_recover();
 	i2c_recover();
 	vTaskDelay(10);
@@ -130,16 +130,15 @@ void i2c_task(void* arg) {
 	parse_report_desc(buf, device_desc.wReportDescLength);
 
 	usb_hid_setup_units(movers.phys);
+
 	usb_init();
 
 	get_report(movers.caps_report_id);
-	//precState.inputMode.mode = 3;
-	//update_device(movers.input_mode_report_id, movers.input_mode_report_len/8, &movers.input_mode, &precState.inputMode);
 
 	command* cmd = pvPortMalloc(256);
 	xSemaphoreGive(sem_alert);
 	while(1) {
-		xSemaphoreTake(sem_alert, portMAX_DELAY);
+		xSemaphoreTake(sem_alert, 400);
 
 		if (gpio_get(GPIOB, GPIO12)) {
 			continue;
@@ -156,6 +155,18 @@ void i2c_task(void* arg) {
 			memcpy(cmd->data, &precState.mouse, sizeof(prec_mouse_report));
 		}
 		xMessageBufferSend(publicInterface.toHostReportBuf, cmd, sizeof(prec_report) + sizeof(cmd_type), 0);
+
+		/* info display */ {
+			static int requests = 0;
+			static TickType_t ticks_prev = 0;
+			TickType_t ticks_now = xTaskGetTickCount();
+			++requests;
+			if(ticks_now - ticks_prev > 1000) {
+				printf("ADR: %02x  FPS: %d rpt/s  MODE: %s\r\n", i2cDevice, requests, precState.wasPrecision ? "precision" : "legacy");
+				ticks_prev = ticks_now;
+				requests = 0;
+			}
+		}
 
 		/* check for incoming feature reports from usb task */
 		size_t bytes = xMessageBufferReceive(publicInterface.toDeviceReportBuf, cmd, 256, 0);

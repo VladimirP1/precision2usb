@@ -153,7 +153,7 @@ void int_init() {
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_AFIO);
 
-	nvic_set_priority(NVIC_EXTI15_10_IRQ, configMAX_SYSCALL_INTERRUPT_PRIORITY);
+	nvic_set_priority(NVIC_EXTI15_10_IRQ, configMAX_SYSCALL_INTERRUPT_PRIORITY + 32);
 	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
 
 	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO_I2C2_SMBAI);
