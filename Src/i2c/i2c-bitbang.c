@@ -15,7 +15,7 @@
 #define G_SDA() gpio_get(GPIOB, GPIO_I2C2_SDA)
 #define SDA(x) if(x) gpio_set(GPIOB, GPIO_I2C2_SDA); else  gpio_clear(GPIOB, GPIO_I2C2_SDA);
 #define SCL(x) if(x) { gpio_set(GPIOB, GPIO_I2C2_SCL); uint32_t _tmout = 100000; while(!gpio_get(GPIOB,GPIO_I2C2_SCL) && _tmout--); } else gpio_clear(GPIOB, GPIO_I2C2_SCL);
-#define HCLK() for(int i=0;i<10;i++){__asm__("nop");};
+#define HCLK() for(int i=0;i<13;i++){__asm__("nop");};
 #define CLK() HCLK();HCLK();
 
 uint8_t i2c_handle(uint8_t in) {
