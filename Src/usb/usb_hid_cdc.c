@@ -619,6 +619,9 @@ void usb_hid_setup_units(struct prec_config_physinfo phys[2])
 
 void usb_init()
 {
+	//rcc_clock_setup_in_hsi_out_48mhz();
+	rcc_clock_setup_in_hse_8mhz_out_72mhz();
+
 	rcc_periph_clock_enable(RCC_GPIOA);
 	/*
 	 * This is a somewhat common cheap hack to trigger device re-enumeration

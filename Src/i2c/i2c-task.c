@@ -117,7 +117,7 @@ void i2c_task(void* arg) {
 retry:
 	i2c_recover();
 	i2c_recover();
-	vTaskDelay(10);
+	vTaskDelay(5);
 
 	i2cDevice = 0x2c; //i2c_scan();
 
@@ -126,7 +126,7 @@ retry:
     	goto retry;
     }
 
-	vTaskDelay(10);
+	vTaskDelay(5);
 
 	status = i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);

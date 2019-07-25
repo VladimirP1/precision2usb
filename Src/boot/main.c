@@ -16,8 +16,7 @@
 #include <stdio.h>
 
 static void basic_hw_init() {
-	//rcc_clock_setup_in_hsi_out_48mhz();
-	rcc_clock_setup_in_hse_8mhz_out_72mhz();
+
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_GPIOB);
