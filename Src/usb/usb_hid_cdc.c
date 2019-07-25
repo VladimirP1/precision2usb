@@ -602,7 +602,7 @@ void usb_hid_setup_units(struct prec_config_physinfo phys[2])
 			}
 	};
 	bitmover_move(&data, &phys[0], hid_report_descriptor_finger + 35);
-	bitmover_move(&data, &phys[0], hid_report_descriptor_finger + 59);
+	bitmover_move(&data, &phys[1], hid_report_descriptor_finger + 59);
 
 	uint8_t* cur = hid_report_descriptor;
 	memcpy(cur, hid_report_descriptor_prefix, sizeof(hid_report_descriptor_prefix));

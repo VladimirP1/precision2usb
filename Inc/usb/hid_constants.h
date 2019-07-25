@@ -131,9 +131,9 @@ static uint8_t hid_report_descriptor_finger[] = {
 		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00, 0x00,               /*          Logical Minimum (0),            */
+		0x16, 0x00, 0x00,               /*          Logical Minimum (0),            */
 		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x35, 0x00, 0x00,               /*          Physical Minimum (0),           */
+		0x36, 0x00, 0x00,               /*          Physical Minimum (0),           */
 		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
 		0x65, 0x11,                     /*          Unit (Centimeter),              */
@@ -141,9 +141,9 @@ static uint8_t hid_report_descriptor_finger[] = {
 		0x09, 0x30,                     /*          Usage (X),                      */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x15, 0x00, 0x00,               /*          Logical Minimum (0),            */
+		0x16, 0x00, 0x00,               /*          Logical Minimum (0),            */
 		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x35, 0x00, 0x00,               /*          Physical Minimum (0),           */
+		0x36, 0x00, 0x00,               /*          Physical Minimum (0),           */
 		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
 		0x65, 0x11,                     /*          Unit (Centimeter),              */
