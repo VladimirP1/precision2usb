@@ -117,18 +117,17 @@ void i2c_task(void* arg) {
 
 	i2c_init();
 	int_init();
-retry:
-	i2c_recover();
-	vTaskDelay(1);
-	i2c_recover();
-	vTaskDelay(50);
+	int status = 1;
+	while(status || device_desc.wHIDDescLength != 30) {
+		i2c_recover();
+		vTaskDelay(1);
+		i2c_recover();
+		vTaskDelay(50);
 
-	i2cDevice = 0x2c;// i2c_scan();
+		i2cDevice = 0x2c; // i2c_scan();
 
-	int status = i2c_read_reg(i2cDevice,0x20,&device_desc,30);
-    if (status || device_desc.wHIDDescLength != 30) {
-    	goto retry;
-    }
+		status = i2c_read_reg(i2cDevice,0x20,&device_desc,30);
+	}
 
 	vTaskDelay(5);
 
