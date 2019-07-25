@@ -26,6 +26,7 @@
 #include "i2c.h"
 #include <hid.h>
 #include <precision.h>
+#include <string.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -177,7 +178,7 @@ static const struct usb_iface_assoc_descriptor cdc_assoc = {
 
 // HID
 
-static const struct {
+static struct {
 	struct usb_hid_descriptor hid_descriptor;
 	struct {
 		uint8_t bReportDescriptorType;
@@ -193,7 +194,7 @@ static const struct {
 	},
 	.hid_report = {
 		.bReportDescriptorType = USB_DT_REPORT,
-		.wDescriptorLength = sizeof(hid_report_descriptor),
+		.wDescriptorLength = 0,
 	}
 };
 
@@ -283,7 +284,7 @@ static enum usbd_request_return_codes hid_control_request(usbd_device *dev, stru
 			&& (req->bRequest == USB_REQ_GET_DESCRIPTOR)
 			&& (req->wValue == 0x2200)) {
 		*buf = (uint8_t *)hid_report_descriptor;
-		*len = sizeof(hid_report_descriptor);
+		*len = hid_function.hid_report.wDescriptorLength;
 
 		return USBD_REQ_HANDLED;
 	}
@@ -569,6 +570,36 @@ static void hid_set_config(usbd_device *dev, uint16_t wValue)
 				USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 				class_interface_control_request);
 
+}
+
+void usb_hid_setup_units(struct prec_config_physinfo phys[2])
+{
+	//base: 35
+	bitmover_data data = {
+			.count = 1,
+			.moves = {
+					{8 * 0, 8 * offsetof(struct prec_config_physinfo, logicalMinimum), 8 * 2},
+					{8 * 3, 8 * offsetof(struct prec_config_physinfo, logicalMaximum), 8 * 2},
+					{8 * 6, 8 * offsetof(struct prec_config_physinfo, physicalMinimum), 8 * 2},
+					{8 * 9, 8 * offsetof(struct prec_config_physinfo, physicalMaximum), 8 * 2},
+					{8 * 12, 8 * offsetof(struct prec_config_physinfo, unitExponent), 4},
+					{8 * 14, 8 * offsetof(struct prec_config_physinfo, unit), 4},
+			}
+	};
+	bitmover_move(&data, &phys[0], hid_report_descriptor_finger + 35);
+	bitmover_move(&data, &phys[0], hid_report_descriptor_finger + 59);
+
+	uint8_t* cur = hid_report_descriptor;
+	memcpy(cur, hid_report_descriptor_prefix, sizeof(hid_report_descriptor_prefix));
+	cur += sizeof(hid_report_descriptor_prefix);
+	for (int i = 0; i < 5; ++i) {
+		memcpy(cur, hid_report_descriptor_finger, sizeof(hid_report_descriptor_finger));
+		cur += sizeof(hid_report_descriptor_finger);
+	}
+	memcpy(cur, hid_report_descriptor_suffix, sizeof(hid_report_descriptor_suffix));
+	cur += sizeof(hid_report_descriptor_suffix);
+
+	hid_function.hid_report.wDescriptorLength = cur - hid_report_descriptor;
 }
 
 void usb_init()

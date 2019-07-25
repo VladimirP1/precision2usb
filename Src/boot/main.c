@@ -28,7 +28,6 @@ static void basic_hw_init() {
 }
 
 static void init_task(void* arg) {
-	//usb_init();
 	vTaskDelay(1000);
 	xTaskCreate(i2c_task, "i2c", 3000, NULL, configMAX_PRIORITIES-2, NULL);
 	vTaskDelete(0);

@@ -126,6 +126,7 @@ void i2c_task(void* arg) {
 	status = i2c_read_reg(0x2c, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);
 
+	usb_hid_setup_units(movers.phys);
 	usb_init();
 
 	get_report(movers.caps_report_id);

@@ -72,6 +72,15 @@ struct prec_mouse_report {
     int8_t Y;
 };
 
+struct prec_config_physinfo {
+	int32_t logicalMinimum;
+	int32_t logicalMaximum;
+	int32_t physicalMinimum;
+	int32_t physicalMaximum;
+	int8_t unitExponent;
+	enum unit unit;
+};
+
 struct prec_config {
     // Windows Precision Touchpad input report
     uint8_t prec_report_id;
@@ -103,12 +112,7 @@ struct prec_config {
     uint16_t mouse_report_len;
     bitmover_data mouse;
     // Other info
-    int32_t logicalMinimum;
-    int32_t logicalMaximum;
-    int32_t physicalMinimum;
-    int32_t physicalMaximum;
-    int8_t unitExponent;
-    enum unit unit;
+    struct prec_config_physinfo phys[2];
 };
 
 //extern prec_config movers;

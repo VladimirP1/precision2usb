@@ -37,7 +37,9 @@ static const uint8_t hid_report_descriptor2[] = {
 	    0xc0                                // END_COLLECTION                   49/50
 };
 
-static const uint8_t hid_report_descriptor[] = {
+static uint8_t hid_report_descriptor[1024];
+
+static const uint8_t hid_report_descriptor_prefix[] = {
 		0x05, 0x01,                     /*  Usage Page (Desktop),                   */
 		0x09, 0x02,                     /*  Usage (Mouse),                          */
 		0xA1, 0x01,                     /*  Collection (Application),               */
@@ -107,6 +109,9 @@ static const uint8_t hid_report_descriptor[] = {
 		0xA1, 0x01,                     /*  Collection (Application),               */
 		0x85, 0x04,                     /*      Report ID (4),                      */
 		0x09, 0x22,                     /*      Usage (Finger),                     */
+};
+
+static uint8_t hid_report_descriptor_finger[] = {
 		0xA1, 0x02,                     /*      Collection (Logical),               */
 		0x15, 0x00,                     /*          Logical Minimum (0),            */
 		0x25, 0x01,                     /*          Logical Maximum (1),            */
@@ -124,18 +129,22 @@ static const uint8_t hid_report_descriptor[] = {
 		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
+		0x15, 0x00, 0x00,               /*          Logical Minimum (0),            */
 		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x75, 0x10,                     /*          Report Size (16),               */
+		0x35, 0x00, 0x00,               /*          Physical Minimum (0),           */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x55, 0x0E,                     /*          Unit Exponent (14),             */
 		0x65, 0x11,                     /*          Unit (Centimeter),              */
+		0x75, 0x10,                     /*          Report Size (16),               */
 		0x09, 0x30,                     /*          Usage (X),                      */
-		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
 		0x95, 0x01,                     /*          Report Count (1),               */
 		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
-		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
+		0x15, 0x00, 0x00,               /*          Logical Minimum (0),            */
+		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
+		0x35, 0x00, 0x00,               /*          Physical Minimum (0),           */
+		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
+		0x55, 0x0E,                     /*          Unit Exponent (14),             */
+		0x65, 0x11,                     /*          Unit (Centimeter),              */
 		0x09, 0x31,                     /*          Usage (Y),                      */
 		0x81, 0x02,                     /*          Input (Variable),               */
 		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
@@ -143,150 +152,9 @@ static const uint8_t hid_report_descriptor[] = {
 		0x25, 0x64,                     /*          Logical Maximum (100),          */
 		0x95, 0x03,                     /*          Report Count (3),               */
 		0xC0,                           /*      End Collection,                     */
-		0xA1, 0x02,                     /*      Collection (Logical),               */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x01,                     /*          Logical Maximum (1),            */
-		0x09, 0x47,                     /*          Usage (Touch Valid),            */
-		0x09, 0x42,                     /*          Usage (Tip Switch),             */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x81, 0x03,                     /*          Input (Constant, Variable),     */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x75, 0x04,                     /*          Report Size (4),                */
-		0x25, 0x0F,                     /*          Logical Maximum (15),           */
-		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x75, 0x10,                     /*          Report Size (16),               */
-		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x11,                     /*          Unit (Centimeter),              */
-		0x09, 0x30,                     /*          Usage (X),                      */
-		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
-		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
-		0x09, 0x31,                     /*          Usage (Y),                      */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x64,                     /*          Logical Maximum (100),          */
-		0x95, 0x03,                     /*          Report Count (3),               */
-		0xC0,                           /*      End Collection,                     */
-		0xA1, 0x02,                     /*      Collection (Logical),               */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x01,                     /*          Logical Maximum (1),            */
-		0x09, 0x47,                     /*          Usage (Touch Valid),            */
-		0x09, 0x42,                     /*          Usage (Tip Switch),             */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x81, 0x03,                     /*          Input (Constant, Variable),     */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x75, 0x04,                     /*          Report Size (4),                */
-		0x25, 0x0F,                     /*          Logical Maximum (15),           */
-		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x75, 0x10,                     /*          Report Size (16),               */
-		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x11,                     /*          Unit (Centimeter),              */
-		0x09, 0x30,                     /*          Usage (X),                      */
-		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
-		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
-		0x09, 0x31,                     /*          Usage (Y),                      */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x64,                     /*          Logical Maximum (100),          */
-		0x95, 0x03,                     /*          Report Count (3),               */
-		0xC0,                           /*      End Collection,                     */
-		0xA1, 0x02,                     /*      Collection (Logical),               */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x01,                     /*          Logical Maximum (1),            */
-		0x09, 0x47,                     /*          Usage (Touch Valid),            */
-		0x09, 0x42,                     /*          Usage (Tip Switch),             */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x81, 0x03,                     /*          Input (Constant, Variable),     */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x75, 0x04,                     /*          Report Size (4),                */
-		0x25, 0x0F,                     /*          Logical Maximum (15),           */
-		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x75, 0x10,                     /*          Report Size (16),               */
-		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x11,                     /*          Unit (Centimeter),              */
-		0x09, 0x30,                     /*          Usage (X),                      */
-		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
-		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
-		0x09, 0x31,                     /*          Usage (Y),                      */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x64,                     /*          Logical Maximum (100),          */
-		0x95, 0x03,                     /*          Report Count (3),               */
-		0xC0,                           /*      End Collection,                     */
-		0xA1, 0x02,                     /*      Collection (Logical),               */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x01,                     /*          Logical Maximum (1),            */
-		0x09, 0x47,                     /*          Usage (Touch Valid),            */
-		0x09, 0x42,                     /*          Usage (Tip Switch),             */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x75, 0x01,                     /*          Report Size (1),                */
-		0x95, 0x02,                     /*          Report Count (2),               */
-		0x81, 0x03,                     /*          Input (Constant, Variable),     */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x75, 0x04,                     /*          Report Size (4),                */
-		0x25, 0x0F,                     /*          Logical Maximum (15),           */
-		0x09, 0x51,                     /*          Usage (Contact Identifier),     */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x01,                     /*          Usage Page (Desktop),           */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x26, 0xCC, 0x04,               /*          Logical Maximum (1228),         */
-		0x75, 0x10,                     /*          Report Size (16),               */
-		0x55, 0x0E,                     /*          Unit Exponent (14),             */
-		0x65, 0x11,                     /*          Unit (Centimeter),              */
-		0x09, 0x30,                     /*          Usage (X),                      */
-		0x35, 0x00,                     /*          Physical Minimum (0),           */
-		0x46, 0x00, 0x04,               /*          Physical Maximum (1024),        */
-		0x95, 0x01,                     /*          Report Count (1),               */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x46, 0x06, 0x03,               /*          Physical Maximum (774),         */
-		0x26, 0xA0, 0x03,               /*          Logical Maximum (928),          */
-		0x09, 0x31,                     /*          Usage (Y),                      */
-		0x81, 0x02,                     /*          Input (Variable),               */
-		0x05, 0x0D,                     /*          Usage Page (Digitizer),         */
-		0x15, 0x00,                     /*          Logical Minimum (0),            */
-		0x25, 0x64,                     /*          Logical Maximum (100),          */
-		0x95, 0x03,                     /*          Report Count (3),               */
-		0xC0,                           /*      End Collection,                     */
+};
+
+static const uint8_t hid_report_descriptor_suffix[] = {
 		0x55, 0x0C,                     /*      Unit Exponent (12),                 */
 		0x66, 0x01, 0x10,               /*      Unit (Seconds),                     */
 		0x47, 0xFF, 0xFF, 0x00, 0x00,   /*      Physical Maximum (65535),           */

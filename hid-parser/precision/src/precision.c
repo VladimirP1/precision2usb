@@ -145,17 +145,19 @@ int prec_init_from_ast(ast_node* root, prec_config *movers) {
             {
             	ast_collection* fingColl = &fingers->children[i]->data.collection;
             	for (int i = 0; i < fingColl->size; ++i) {
-            		if (fingColl->children[i]->type == NODE_REPORT_FIELD && fingColl->children[i]->data.report.usage == 0x010030) {
+            		if (fingColl->children[i]->type == NODE_REPORT_FIELD && (fingColl->children[i]->data.report.usage & ~1) == 0x010030) {
+            			int idx = fingColl->children[i]->data.report.usage & 1;
             			ast_report* rpt = &fingColl->children[i]->data.report;
-            			movers->physicalMaximum = rpt->physMax;
-            			movers->physicalMinimum = rpt->physMin;
-            			movers->logicalMaximum = rpt->logMax;
-            			movers->logicalMinimum = rpt->logMin;
-            			movers->unit = rpt->unit;
-            			movers->unitExponent = rpt->unitExpo;
+            			movers->phys[idx].physicalMaximum = rpt->physMax;
+            			movers->phys[idx].physicalMinimum = rpt->physMin;
+            			movers->phys[idx].logicalMaximum = rpt->logMax;
+            			movers->phys[idx].logicalMinimum = rpt->logMin;
+            			movers->phys[idx].unit = rpt->unit;
+            			movers->phys[idx].unitExponent = rpt->unitExpo;
             		}
             	}
-            	assert(movers->unit);
+            	assert(movers->phys[0].unit);
+            	assert(movers->phys[1].unit);
             }
         }
         ast_free(_fingers);
