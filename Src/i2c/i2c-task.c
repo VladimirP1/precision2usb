@@ -112,14 +112,17 @@ void i2c_task(void* arg) {
 	publicInterface.toHostReportBuf = xMessageBufferCreate(128);
 	publicInterface.toDeviceReportBuf = xMessageBufferCreate(128);
 
+	vTaskDelay(40);
+
 	i2c_init();
 	int_init();
 retry:
 	i2c_recover();
+	vTaskDelay(1);
 	i2c_recover();
-	vTaskDelay(5);
+	vTaskDelay(50);
 
-	i2cDevice = 0x2c; //i2c_scan();
+	i2cDevice = i2c_scan();
 
 	int status = i2c_read_reg(i2cDevice,0x20,&device_desc,30);
     if (status || device_desc.wHIDDescLength != 30) {
@@ -127,6 +130,8 @@ retry:
     }
 
 	vTaskDelay(5);
+
+	i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 
 	status = i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);

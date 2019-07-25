@@ -619,10 +619,8 @@ void usb_hid_setup_units(struct prec_config_physinfo phys[2])
 
 void usb_init()
 {
-	//rcc_clock_setup_in_hsi_out_48mhz();
-	rcc_clock_setup_in_hse_8mhz_out_72mhz();
-
 	rcc_periph_clock_enable(RCC_GPIOA);
+
 	/*
 	 * This is a somewhat common cheap hack to trigger device re-enumeration
 	 * on startup.  Assuming a fixed external pullup on D+, (For USB-FS)
@@ -635,9 +633,8 @@ void usb_init()
 	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
 	gpio_clear(GPIOA, GPIO12);
-	for (unsigned i = 0; i < 800000; i++) {
-		__asm__("nop");
-	}
+
+	vTaskDelay(100);
 
 	cdc_rx_buf = xStreamBufferCreate(128, 0);
 	cdc_tx_buf = xStreamBufferCreate(128, 0);

@@ -16,14 +16,13 @@
 #include <stdio.h>
 
 static void basic_hw_init() {
-
+	//rcc_clock_setup_in_hsi_out_48mhz();
+	rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_GPIOC);
 	rcc_periph_clock_enable(RCC_AFIO);
-
-	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
 }
 
 static void init_task(void* arg) {
