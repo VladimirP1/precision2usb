@@ -8,6 +8,8 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#define IS_PRESSPAD 1
+
 static const uint8_t hid_report_descriptor2[] = {
 	    0x05, 0x01,                         // USAGE_PAGE (Generic Desktop)     0
 	    0x09, 0x02,                         // USAGE (Mouse)                    2

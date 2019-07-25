@@ -301,7 +301,8 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 	// Device capabilities
 	if ((req->bRequest == 0x01) && (req->wValue == 0x0302)) {
 		precision_feature_rpt[0] = 2;
-		precision_feature_rpt[1] = 0x15;
+		precision_feature_rpt[1] = IS_PRESSPAD ? 0x15 : 0x05;
+
 		*buf = precision_feature_rpt;
 		*len = 2;
 
@@ -318,6 +319,13 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 
 	// Latency mode
 	if ((req->bRequest == 0x09) && (req->wValue == 0x0307)) {
+		uint8_t _cmd[sizeof(prec_latency_report) + sizeof(cmd_type)];
+		command* cmd = (command*) _cmd;
+
+		cmd->cmdType = CMD_FEATURE_LATENCY_MODE;
+		((prec_latency_report*)cmd->data)->mode = (*buf)[1];
+		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_latency_report) + sizeof(cmd_type), 0);
+
 		return USBD_REQ_HANDLED;
 	}
 
@@ -335,9 +343,16 @@ static enum usbd_request_return_codes precision_get_set_report(usbd_device *dev,
 
 	// Selective reporting
 	if ((req->bRequest == 0x09) && (req->wValue == 0x0305)) {
+		uint8_t _cmd[sizeof(prec_selective_reporting_report) + sizeof(cmd_type)];
+		command* cmd = (command*) _cmd;
+
+		cmd->cmdType = CMD_FEATURE_SELECTIVE_REPORTING;
+		((prec_selective_reporting_report*)cmd->data)->surface = (*buf)[1] & 1;
+		((prec_selective_reporting_report*)cmd->data)->sw = ((*buf)[1] >> 1) & 1;
+		xMessageBufferSend(publicInterface.toDeviceReportBuf, cmd, sizeof(prec_selective_reporting_report) + sizeof(cmd_type), 0);
+
 		return USBD_REQ_HANDLED;
 	}
-
 
 	return USBD_REQ_NOTSUPP;
 }

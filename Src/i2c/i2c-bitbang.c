@@ -104,6 +104,24 @@ void i2c_init() {
 
 }
 
+uint8_t i2c_scan() {
+	for (int i = 0; i < 127; ++i) {
+		if ((i & 0xf0 == 0) || (i & 0xf0 == 0xf0)) {
+			continue;
+		}
+		i2c_start();
+		if (i2c_sendbyte(i << 1)) { // WRITE
+			i2c_stop();
+			i2c_handle(1);
+			return i;
+		}
+		i2c_stop();
+		i2c_handle(1);
+		vTaskDelay(1);
+	}
+	return 0;
+}
+
 uint8_t i2c_transfer(uint8_t adr, uint8_t* wbuf, size_t wlen, uint8_t*rbuf, size_t rlen) {
 	i2c_start();
 	if (!i2c_sendbyte(adr << 1)) { // WRITE
@@ -265,7 +283,7 @@ uint8_t i2c_cmd_set_report(uint8_t adr, uint16_t cmd_reg, uint16_t data_reg, uin
 		memcpy(_cmd->alt.big.data, buf, len);
 	}
 
-	if (i2c_transfer(0x2c, static_buf, len + 8 + (buf[0] >= 15), NULL, 0)) {
+	if (i2c_transfer(adr, static_buf, len + 8 + (buf[0] >= 15), NULL, 0)) {
 		return 1;
 	}
 	return 0;

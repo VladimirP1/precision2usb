@@ -11,6 +11,7 @@ void i2c_init();
 void i2c_start();
 void i2c_stop();
 void i2c_recover();
+uint8_t i2c_scan();
 uint8_t i2c_rcvbyte(uint8_t ack);
 uint8_t i2c_sendbyte(uint8_t data);
 uint8_t i2c_transfer(uint8_t adr, uint8_t* wbuf, size_t wlen, uint8_t*rbuf,
@@ -47,6 +48,8 @@ typedef enum {
 	CMD_INPUT_PREC,
 	CMD_INPUT_MOUSE,
 	CMD_FEATURE_INPUT_MODE,
+	CMD_FEATURE_LATENCY_MODE,
+	CMD_FEATURE_SELECTIVE_REPORTING,
 } cmd_type;
 
 typedef struct {

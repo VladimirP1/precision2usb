@@ -17,6 +17,7 @@ hid_dev_desc device_desc;
 uint8_t buf[1024];
 prec_state precState;
 static prec_config movers;
+uint8_t i2cDevice = 0;
 
 static void parse_report_desc(uint8_t* buf, size_t len) {
 	token tok;
@@ -60,14 +61,14 @@ static int update_device(uint8_t id, uint16_t len, bitmover_data* mv, void* src)
 	memset(buf, 0, len + 1);
 	buf[0] = id;
 	bitmover_move_rev(mv, buf + 1, src);
-	uint8_t status = i2c_cmd_set_report(0x2c,  device_desc.wCommandRegister, device_desc.wDataRegister, buf, len + 1);
+	uint8_t status = i2c_cmd_set_report(i2cDevice,  device_desc.wCommandRegister, device_desc.wDataRegister, buf, len + 1);
 	assert(!status);
 	return 0;
 }
 
 static void get_report(uint8_t id) {
 	uint16_t len = (uint16_t) sizeof(buf);
-	uint8_t status = i2c_cmd_get_report(0x2c,  device_desc.wCommandRegister, device_desc.wDataRegister, id, buf, &len);
+	uint8_t status = i2c_cmd_get_report(i2cDevice,  device_desc.wCommandRegister, device_desc.wDataRegister, id, buf, &len);
 	assert(!status);
 	update_state(&precState, &movers, buf + 2, len - 2);
 	//printf("id=%d, len=%d\r\n", id, len);
@@ -78,7 +79,7 @@ static void get_report_input() {
 	static uint8_t fingTotal = 0;
 
 	uint16_t len = sizeof(buf);
-	if (i2c_get_report(0x2c, device_desc.wInputRegister, buf, &len)) {
+	if (i2c_get_report(i2cDevice, device_desc.wInputRegister, buf, &len)) {
 		return;
 	}
 	uint8_t *rptBuf = buf + 3;
@@ -118,12 +119,14 @@ void i2c_task(void* arg) {
 	i2c_recover();
 	vTaskDelay(10);
 
-	int status = i2c_read_reg(0x2c,0x20,&device_desc,30);
+	i2cDevice = i2c_scan();
+
+	int status = i2c_read_reg(i2cDevice,0x20,&device_desc,30);
 	assert(!status);
 
 	vTaskDelay(10);
 
-	status = i2c_read_reg(0x2c, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
+	status = i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);
 
 	usb_hid_setup_units(movers.phys);
@@ -144,6 +147,7 @@ void i2c_task(void* arg) {
 
 		/* check for input report and send to usb task */
 		get_report_input();
+
 		if (precState.wasPrecision) {
 			cmd->cmdType = CMD_INPUT_PREC;
 			memcpy(cmd->data, &precState.input, sizeof(prec_report));
@@ -163,6 +167,14 @@ void i2c_task(void* arg) {
 			case CMD_FEATURE_INPUT_MODE:
 				memcpy(&precState.inputMode, cmd->data, sizeof(prec_input_mode_report));
 				update_device(movers.input_mode_report_id, movers.input_mode_report_len/8, &movers.input_mode, &precState.inputMode);
+				break;
+			case CMD_FEATURE_LATENCY_MODE:
+				memcpy(&precState.latency, cmd->data, sizeof(prec_latency_report));
+				update_device(movers.latency_report_id, movers.latency_report_len/8, &movers.latency, &precState.latency);
+				break;
+			case CMD_FEATURE_SELECTIVE_REPORTING:
+				memcpy(&precState.selectiveRep, cmd->data, sizeof(prec_selective_reporting_report));
+				update_device(movers.selective_reporting_report_id, movers.selective_reporting_report_len/8, &movers.selective_reporting, &precState.selectiveRep);
 				break;
 			default: break;
 		}
