@@ -197,7 +197,7 @@ uint8_t i2c_set_report(uint8_t adr, uint16_t reg, void* buf, uint16_t len) {
 
 uint8_t i2c_get_report(uint8_t adr, uint16_t reg, void* buf, uint16_t* len) {
 	i2c_start();
-	if (!i2c_sendbyte(adr << 1)) { // READ
+	if (!i2c_sendbyte(adr << 1)) { // WRITE
 		return i2c_handle(1);
 	}
 	for (size_t i = 0; i < 2; ++i) {
@@ -207,7 +207,7 @@ uint8_t i2c_get_report(uint8_t adr, uint16_t reg, void* buf, uint16_t* len) {
 	}
 
 	i2c_start();
-	if (!i2c_sendbyte(adr << 1 | 1)) { // WRITE
+	if (!i2c_sendbyte(adr << 1 | 1)) { // READ
 		return i2c_handle(3);
 	}
 	if (*len < 2) {
@@ -215,14 +215,20 @@ uint8_t i2c_get_report(uint8_t adr, uint16_t reg, void* buf, uint16_t* len) {
 	}
 	((uint8_t*)buf)[0] = i2c_rcvbyte(1);
 	((uint8_t*)buf)[1] = i2c_rcvbyte(1);
-	uint16_t rlen = *((uint16_t*)buf) - 2;
-	if (rlen > *len) {
-		return i2c_handle(4);
+
+	uint16_t rlen = *((uint16_t*)buf);
+
+	if (*((uint16_t*)buf) < 2) {
+		return i2c_handle(12);
 	}
-	*len = rlen + 2;
+
+	if (rlen > *len) {
+		return i2c_handle(5);
+	}
+	*len = rlen;
 	if(rlen) {
-		for (size_t i = 0; i < rlen; ++i) {
-			((uint8_t*)buf)[i + 2] = i2c_rcvbyte(i != rlen - 1);
+		for (size_t i = 2; i < rlen; ++i) {
+			((uint8_t*)buf)[i] = i2c_rcvbyte(i != rlen - 1);
 		}
 	}
 	i2c_stop();

@@ -74,13 +74,13 @@ static void get_report(uint8_t id) {
 	//printf("id=%d, len=%d\r\n", id, len);
 }
 
-static void get_report_input() {
+static int get_report_input() {
 	static uint8_t fingIdx = 0;
 	static uint8_t fingTotal = 0;
 
 	uint16_t len = sizeof(buf);
 	if (i2c_get_report(i2cDevice, device_desc.wInputRegister, buf, &len)) {
-		return;
+		return 1;
 	}
 	uint8_t *rptBuf = buf + 3;
 
@@ -105,6 +105,7 @@ static void get_report_input() {
 	} else {
 		bitmover_move(&movers.mouse, rptBuf, &precState.mouse);
 	}
+	return 0;
 }
 
 void i2c_task(void* arg) {
@@ -122,7 +123,7 @@ retry:
 	i2c_recover();
 	vTaskDelay(50);
 
-	i2cDevice = i2c_scan();
+	i2cDevice = 0x2c;// i2c_scan();
 
 	int status = i2c_read_reg(i2cDevice,0x20,&device_desc,30);
     if (status || device_desc.wHIDDescLength != 30) {
@@ -143,7 +144,7 @@ retry:
 	get_report(movers.caps_report_id);
 
 	command* cmd = pvPortMalloc(256);
-	xSemaphoreGive(sem_alert);
+
 	while(1) {
 		xSemaphoreTake(sem_alert, 400);
 
@@ -152,7 +153,9 @@ retry:
 		}
 
 		/* check for input report and send to usb task */
-		get_report_input();
+		if (get_report_input()) {
+			continue;
+		}
 
 		if (precState.wasPrecision) {
 			cmd->cmdType = CMD_INPUT_PREC;
