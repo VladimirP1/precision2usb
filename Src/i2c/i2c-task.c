@@ -155,6 +155,25 @@ void i2c_task(void* arg) {
 			continue;
 		}
 
+		/*{
+			prec_mouse_report rpt = {
+					.X = 0,
+					.Y = 0,
+					.btn1 = 0,
+					.btn2 = 0,
+					.btn3 = 0,
+			};
+			if ((xTaskGetTickCount() % 10000) > 5000) {
+				//precState.input.info.contactCount = 1;
+				//rpt.X = 1;
+				rpt.btn3 = 1;
+			}
+
+			cmd->cmdType = CMD_INPUT_MOUSE2;
+			memcpy(cmd->data, &rpt, sizeof(prec_mouse_report));
+			xMessageBufferSend(publicInterface.toHostReportBuf, cmd, sizeof(prec_report) + sizeof(cmd_type), 0);
+		}*/
+
 		if (precState.wasPrecision) {
 			cmd->cmdType = CMD_INPUT_PREC;
 			memcpy(cmd->data, &precState.input, sizeof(prec_report));

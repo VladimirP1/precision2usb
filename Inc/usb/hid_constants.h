@@ -19,13 +19,13 @@ static const uint8_t hid_report_descriptor2[] = {
 	    0xa1, 0x00,                         //   COLLECTION (Physical)          10
 	    0x05, 0x09,                         //     USAGE_PAGE (Button)          12
 	    0x19, 0x01,                         //     USAGE_MINIMUM (Button 1)     14
-	    0x29, 0x02,                         //     USAGE_MAXIMUM (Button 2)     16
+	    0x29, 0x03,                         //     USAGE_MAXIMUM (Button 3)     16
 	    0x15, 0x00,                         //     LOGICAL_MINIMUM (0)          18
 	    0x25, 0x01,                         //     LOGICAL_MAXIMUM (1)          20
 	    0x75, 0x01,                         //     REPORT_SIZE (1)              22
-	    0x95, 0x02,                         //     REPORT_COUNT (2)             24
+	    0x95, 0x03,                         //     REPORT_COUNT (3)             24
 	    0x81, 0x02,                         //     INPUT (Data,Var,Abs)         26
-	    0x95, 0x06,                         //     REPORT_COUNT (6)             28
+	    0x95, 0x05,                         //     REPORT_COUNT (5)             28
 	    0x81, 0x03,                         //     INPUT (Cnst,Var,Abs)         30
 	    0x05, 0x01,                         //     USAGE_PAGE (Generic Desktop) 32
 	    0x09, 0x30,                         //     USAGE (X)                    34

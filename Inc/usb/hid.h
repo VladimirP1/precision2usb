@@ -22,7 +22,8 @@ struct mouse_report {
 	uint8_t id : 8;
 	uint8_t btn1 : 1;
 	uint8_t btn2 : 1;
-	uint8_t __pad0 : 6;
+	uint8_t btn3 : 1;
+	uint8_t __pad0 : 5;
 	int8_t X : 8;
 	int8_t Y : 8;
 } __attribute__((packed));

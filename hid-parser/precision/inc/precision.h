@@ -68,6 +68,7 @@ struct prec_selective_reporting_report {
 struct prec_mouse_report {
     uint8_t btn1;
     uint8_t btn2;
+    uint8_t btn3;
     int8_t X;
     int8_t Y;
 };

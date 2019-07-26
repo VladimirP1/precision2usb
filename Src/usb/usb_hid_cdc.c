@@ -45,6 +45,7 @@ static usbd_device *usbd_dev;
 static SemaphoreHandle_t cdc_tx_semaphore;
 static SemaphoreHandle_t cdc_rx_semaphore;
 static SemaphoreHandle_t hid_input_semaphore;
+static SemaphoreHandle_t hid_input_semaphore2;
 static StreamBufferHandle_t cdc_tx_buf;
 static StreamBufferHandle_t cdc_rx_buf;
 static bool usb_ready = false;
@@ -235,6 +236,65 @@ static const struct usb_iface_assoc_descriptor hid_assoc = {
 	.iFunction = 0,
 };
 
+// HID2
+
+static struct {
+	struct usb_hid_descriptor hid_descriptor;
+	struct {
+		uint8_t bReportDescriptorType;
+		uint16_t wDescriptorLength;
+	} __attribute__((packed)) hid_report;
+} __attribute__((packed)) hid_function2 = {
+	.hid_descriptor = {
+		.bLength = sizeof(hid_function2),
+		.bDescriptorType = USB_DT_HID,
+		.bcdHID = 0x0100,
+		.bCountryCode = 0,
+		.bNumDescriptors = 1,
+	},
+	.hid_report = {
+		.bReportDescriptorType = USB_DT_REPORT,
+		.wDescriptorLength = sizeof(hid_report_descriptor2),
+	}
+};
+
+const struct usb_endpoint_descriptor hid_endpoint2 = {
+		.bLength = USB_DT_ENDPOINT_SIZE,
+		.bDescriptorType = USB_DT_ENDPOINT,
+		.bEndpointAddress = 0x84,
+		.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+		.wMaxPacketSize = 64,
+		.bInterval = 0x01,
+};
+
+const struct usb_interface_descriptor hid_iface2 = {
+		.bLength = USB_DT_INTERFACE_SIZE,
+		.bDescriptorType = USB_DT_INTERFACE,
+		.bInterfaceNumber = 3,
+		.bAlternateSetting = 0,
+		.bNumEndpoints = 1,
+		.bInterfaceClass = USB_CLASS_HID,
+		.bInterfaceSubClass = 1, /* boot */
+		.bInterfaceProtocol = 2, /* mouse */
+		.iInterface = 0,
+
+		.endpoint = &hid_endpoint2,
+
+		.extra = &hid_function2,
+		.extralen = sizeof(hid_function2),
+};
+
+static const struct usb_iface_assoc_descriptor hid_assoc2 = {
+	.bLength = USB_DT_INTERFACE_ASSOCIATION_SIZE,
+	.bDescriptorType = USB_DT_INTERFACE_ASSOCIATION,
+	.bFirstInterface = 3,
+	.bInterfaceCount = 1,
+	.bFunctionClass = USB_CLASS_HID,
+	.bFunctionSubClass = 1,
+	.bFunctionProtocol = 2,
+	.iFunction = 0,
+};
+
 // General
 
 const struct usb_interface ifaces[] = {{
@@ -248,6 +308,10 @@ const struct usb_interface ifaces[] = {{
 	.num_altsetting = 1,
 	.iface_assoc = &hid_assoc,
 	.altsetting = &hid_iface,
+}, {
+	.num_altsetting = 1,
+	.iface_assoc = &hid_assoc2,
+	.altsetting = &hid_iface2,
 }
 };
 
@@ -255,7 +319,7 @@ const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
 	.wTotalLength = 0,
-	.bNumInterfaces = 3,
+	.bNumInterfaces = 4,
 	.bConfigurationValue = 1,
 	.iConfiguration = 0,
 	.bmAttributes = 0xC0,
@@ -283,8 +347,14 @@ static enum usbd_request_return_codes hid_control_request(usbd_device *dev, stru
 	if ((req->bmRequestType == 0x81)
 			&& (req->bRequest == USB_REQ_GET_DESCRIPTOR)
 			&& (req->wValue == 0x2200)) {
-		*buf = (uint8_t *)hid_report_descriptor;
-		*len = hid_function.hid_report.wDescriptorLength;
+
+		if (req->wIndex == 2) {
+			*buf = (uint8_t *)hid_report_descriptor;
+			*len = hid_function.hid_report.wDescriptorLength;
+		} else {
+			*buf = hid_report_descriptor2;
+			*len = hid_function2.hid_report.wDescriptorLength;
+		}
 
 		return USBD_REQ_HANDLED;
 	}
@@ -452,13 +522,8 @@ static void cdcacm_data_tx_task(void* arg) {
 		xSemaphoreTake(cdc_tx_semaphore, 256);
 
 		cm_disable_interrupts();
-		uint16_t ret = usbd_ep_write_packet(usbd_dev, 0x82, buf, len);
+		usbd_ep_write_packet(usbd_dev, 0x82, buf, len);
 		cm_enable_interrupts();
-
-		/*if (!ret) {
-			// In case of an error, just ignore it
-			xSemaphoreGive(cdc_tx_semaphore);
-		}*/
 	}
 }
 
@@ -466,6 +531,15 @@ static void hid_input_ok(usbd_device *usbd_dev, uint8_t ep)
 {
 	BaseType_t hp_task_woken = pdFALSE;
 	xSemaphoreGiveFromISR(hid_input_semaphore, &hp_task_woken);
+	if (hp_task_woken) {
+		taskYIELD();
+	}
+}
+
+static void hid_input_ok2(usbd_device *usbd_dev, uint8_t ep)
+{
+	BaseType_t hp_task_woken = pdFALSE;
+	xSemaphoreGiveFromISR(hid_input_semaphore2, &hp_task_woken);
 	if (hp_task_woken) {
 		taskYIELD();
 	}
@@ -496,16 +570,12 @@ void hid_service_task(void* arg) {
 					.X = inRpt->X,
 					.Y = inRpt->Y,
 					.btn1 = inRpt->btn1,
-					.btn2 = inRpt->btn2
+					.btn2 = inRpt->btn2,
+					.btn3 = inRpt->btn3
 				};
 				cm_disable_interrupts();
-				uint16_t ret = usbd_ep_write_packet(usbd_dev, 0x81, &rpt, sizeof(struct mouse_report));
+				usbd_ep_write_packet(usbd_dev, 0x81, &rpt, sizeof(struct mouse_report));
 				cm_enable_interrupts();
-
-				if (!ret) {
-					// In case of an error, just ignore it
-					xSemaphoreGive(hid_input_semaphore);
-				}
 			} break;
 			case CMD_INPUT_PREC: {
 				xSemaphoreTake(hid_input_semaphore, 128);
@@ -534,13 +604,24 @@ void hid_service_task(void* arg) {
 					rpt.fingers[i].__pad0 = 0;
 				}
 				cm_disable_interrupts();
-				uint16_t ret = usbd_ep_write_packet(usbd_dev, 0x81, &rpt, sizeof(struct precision_report));
+				usbd_ep_write_packet(usbd_dev, 0x81, &rpt, sizeof(struct precision_report));
 				cm_enable_interrupts();
-
-				if (!ret) {
-					// In case of an error, just ignore it
-					xSemaphoreGive(hid_input_semaphore);
-				}
+			} break;
+			case CMD_INPUT_MOUSE2: {
+				xSemaphoreTake(hid_input_semaphore2, 128);
+				prec_mouse_report* inRpt = (prec_mouse_report*) cmd->data;
+				struct mouse_report rpt = {
+					.id = 1,
+					.__pad0 = 0,
+					.X = inRpt->X,
+					.Y = inRpt->Y,
+					.btn1 = inRpt->btn1,
+					.btn2 = inRpt->btn2,
+					.btn3 = inRpt->btn3
+				};
+				cm_disable_interrupts();
+				usbd_ep_write_packet(usbd_dev, 0x84, &rpt, sizeof(struct mouse_report));
+				cm_enable_interrupts();
 			} break;
 			default: break;
 		}
@@ -574,6 +655,8 @@ static void hid_set_config(usbd_device *dev, uint16_t wValue)
 					USB_REQ_TYPE_STANDARD | USB_REQ_TYPE_INTERFACE,
 					USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 					hid_control_request);
+	// HID2
+	usbd_ep_setup(dev, 0x84, USB_ENDPOINT_ATTR_INTERRUPT, 64, hid_input_ok2);
 
 	// CDC
 	usbd_ep_setup(usbd_dev, 0x01, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_rx_cb);
@@ -644,6 +727,7 @@ void usb_init()
 	cdc_tx_semaphore = xSemaphoreCreateBinary();
 	cdc_rx_semaphore = xSemaphoreCreateBinary();
 	hid_input_semaphore = xSemaphoreCreateBinary();
+	hid_input_semaphore2 = xSemaphoreCreateBinary();
 
 	usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev_descr, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
 	usbd_register_set_config_callback(usbd_dev, hid_set_config);
