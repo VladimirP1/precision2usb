@@ -472,6 +472,8 @@ static void hid_input_ok(usbd_device *usbd_dev, uint8_t ep)
 }
 
 void hid_service_task(void* arg) {
+	while (!usb_ready) { vTaskDelay(100); }
+
 	command* cmd = pvPortMalloc(256);
 
 	// Give the semaphore to self for the first transmission
@@ -585,6 +587,7 @@ static void hid_set_config(usbd_device *dev, uint16_t wValue)
 				USB_REQ_TYPE_TYPE | USB_REQ_TYPE_RECIPIENT,
 				class_interface_control_request);
 
+	usb_ready = true;
 }
 
 void usb_hid_setup_units(struct prec_config_physinfo phys[2])
@@ -656,7 +659,6 @@ void usb_init()
 	xTaskCreate(cdcacm_data_rx_task, "cdc_rcv", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 	xTaskCreate(hid_service_task, "hid_service", 100, NULL, configMAX_PRIORITIES - 1, NULL);
 
-	usb_ready = true;
 }
 
 void usb_wakeup_isr()

@@ -118,7 +118,7 @@ void i2c_task(void* arg) {
 	i2c_init();
 	int_init();
 	int status = 1;
-	while(status || device_desc.wHIDDescLength != 30) {
+	while(status || device_desc.wHIDDescLength != 30 || device_desc.wReportDescLength > (1024 - 2)) {
 		i2c_recover();
 		vTaskDelay(1);
 		i2c_recover();
@@ -130,8 +130,6 @@ void i2c_task(void* arg) {
 	}
 
 	vTaskDelay(5);
-
-	i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 
 	status = i2c_read_reg(i2cDevice, device_desc.wReportDescRegister, buf, device_desc.wReportDescLength);
 	parse_report_desc(buf, device_desc.wReportDescLength);
