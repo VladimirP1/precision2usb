@@ -113,7 +113,7 @@ void i2c_task(void* arg) {
 	publicInterface.toHostReportBuf = xMessageBufferCreate(128);
 	publicInterface.toDeviceReportBuf = xMessageBufferCreate(128);
 
-	vTaskDelay(40);
+	vTaskDelay(10);
 
 	i2c_init();
 	int_init();
@@ -142,6 +142,7 @@ void i2c_task(void* arg) {
 
 	command* cmd = pvPortMalloc(256);
 
+	xSemaphoreGive(sem_alert);
 	while(1) {
 		xSemaphoreTake(sem_alert, 400);
 

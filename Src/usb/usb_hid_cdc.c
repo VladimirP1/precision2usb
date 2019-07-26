@@ -472,7 +472,7 @@ static void hid_input_ok(usbd_device *usbd_dev, uint8_t ep)
 }
 
 void hid_service_task(void* arg) {
-	while (!usb_ready) { vTaskDelay(100); }
+	while (!usb_ready) { vTaskDelay(10); }
 
 	command* cmd = pvPortMalloc(256);
 
@@ -637,7 +637,7 @@ void usb_init()
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
 	gpio_clear(GPIOA, GPIO12);
 
-	vTaskDelay(100);
+	vTaskDelay(30);
 
 	cdc_rx_buf = xStreamBufferCreate(128, 0);
 	cdc_tx_buf = xStreamBufferCreate(128, 0);
