@@ -26,6 +26,8 @@ uint8_t i2c_get_report(uint8_t adr, uint16_t reg, void* buf, uint16_t* len);
 uint8_t i2c_set_report(uint8_t adr, uint16_t reg, void* buf, uint16_t len);
 uint8_t i2c_cmd_get_report(uint8_t adr, uint16_t cmd_reg, uint16_t data_reg, uint8_t rpt_id, uint8_t *buf, uint16_t*len);
 uint8_t i2c_cmd_set_report(uint8_t adr, uint16_t cmd_reg, uint16_t data_reg, uint8_t *buf, uint16_t len);
+uint8_t i2c_cmd_reset(uint8_t adr, uint16_t cmd_reg);
+
 typedef struct {
 	 uint16_t wHIDDescLength;
 	 uint16_t bcdVersion;

@@ -295,4 +295,25 @@ uint8_t i2c_cmd_set_report(uint8_t adr, uint16_t cmd_reg, uint16_t data_reg, uin
 	return 0;
 }
 
+uint8_t i2c_cmd_reset(uint8_t adr, uint16_t cmd_reg) {
+	struct cmd {
+		uint16_t cmd_reg;
+		uint8_t rpt_id : 4;
+		uint8_t rpt_type : 4;
+		uint8_t opcode;
+	} __attribute__((packed));
+
+	struct cmd *_cmd = (struct cmd*) static_buf;
+
+	_cmd->cmd_reg = cmd_reg;
+	_cmd->rpt_id = 0x00;
+	_cmd->rpt_type = 0x00;
+	_cmd->opcode = 0x01;
+
+	if (i2c_transfer(adr, static_buf, sizeof(struct cmd), NULL, 0)) {
+		return 1;
+	}
+	return 0;
+}
+
 
