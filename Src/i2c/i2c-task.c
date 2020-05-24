@@ -146,7 +146,7 @@ void i2c_task(void* arg) {
 	while(1) {
 		xSemaphoreTake(sem_alert, 400);
 
-		if (gpio_get(GPIOB, GPIO12)) {
+		if (gpio_get(GPIOA, GPIO3)) {
 			continue;
 		}
 

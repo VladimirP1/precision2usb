@@ -12,9 +12,9 @@
 
 // ---- i2c bitbang ----
 
-#define G_SDA() gpio_get(GPIOB, GPIO_I2C2_SDA)
-#define SDA(x) if(x) gpio_set(GPIOB, GPIO_I2C2_SDA); else  gpio_clear(GPIOB, GPIO_I2C2_SDA);
-#define SCL(x) if(x) { gpio_set(GPIOB, GPIO_I2C2_SCL); uint32_t _tmout = 100000; while(!gpio_get(GPIOB,GPIO_I2C2_SCL) && _tmout--); } else gpio_clear(GPIOB, GPIO_I2C2_SCL);
+#define G_SDA() gpio_get(GPIOA, GPIO1)
+#define SDA(x) if(x) gpio_set(GPIOA, GPIO1); else  gpio_clear(GPIOA, GPIO1);
+#define SCL(x) if(x) { gpio_set(GPIOA, GPIO2); uint32_t _tmout = 100000; while(!gpio_get(GPIOA,GPIO2) && _tmout--); } else gpio_clear(GPIOA, GPIO2);
 #define HCLK() for(int i=0;i<13;i++){__asm__("nop");};
 #define CLK() HCLK();HCLK();
 
@@ -92,15 +92,16 @@ void i2c_recover() {
 }
 
 void i2c_init() {
+	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_AFIO);
 
 	SDA(1);
 	SCL(1);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_2_MHZ,
+	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ,
 			  GPIO_CNF_OUTPUT_OPENDRAIN,
-		      GPIO_I2C2_SCL | GPIO_I2C2_SDA);
+		      GPIO1 | GPIO2);
 
 }
 
@@ -150,21 +151,22 @@ uint8_t i2c_transfer(uint8_t adr, uint8_t* wbuf, size_t wlen, uint8_t*rbuf, size
 SemaphoreHandle_t sem_alert;
 
 void int_init() {
+	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_GPIOB);
 	rcc_periph_clock_enable(RCC_AFIO);
 
-	nvic_set_priority(NVIC_EXTI15_10_IRQ, configMAX_SYSCALL_INTERRUPT_PRIORITY + 32);
-	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
+	nvic_set_priority(NVIC_EXTI3_IRQ, configMAX_SYSCALL_INTERRUPT_PRIORITY + 32);
+	nvic_enable_irq(NVIC_EXTI3_IRQ);
 
-	gpio_set_mode(GPIOB, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO_I2C2_SMBAI);
+	gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT, GPIO3);
 
-	exti_select_source(EXTI12, GPIOB);
-	exti_set_trigger(EXTI12, EXTI_TRIGGER_FALLING);
-	exti_enable_request(EXTI12);
+	exti_select_source(EXTI3, GPIOA);
+	exti_set_trigger(EXTI3, EXTI_TRIGGER_FALLING);
+	exti_enable_request(EXTI3);
 }
 
-void exti15_10_isr() {
-	exti_reset_request(EXTI12);
+void exti3_isr() {
+	exti_reset_request(EXTI3);
 	BaseType_t hp_task_woken = pdFALSE;
 	xSemaphoreGiveFromISR(sem_alert, &hp_task_woken);
 	if (hp_task_woken) {
@@ -290,27 +292,6 @@ uint8_t i2c_cmd_set_report(uint8_t adr, uint16_t cmd_reg, uint16_t data_reg, uin
 	}
 
 	if (i2c_transfer(adr, static_buf, len + 8 + (buf[0] >= 15), NULL, 0)) {
-		return 1;
-	}
-	return 0;
-}
-
-uint8_t i2c_cmd_reset(uint8_t adr, uint16_t cmd_reg) {
-	struct cmd {
-		uint16_t cmd_reg;
-		uint8_t rpt_id : 4;
-		uint8_t rpt_type : 4;
-		uint8_t opcode;
-	} __attribute__((packed));
-
-	struct cmd *_cmd = (struct cmd*) static_buf;
-
-	_cmd->cmd_reg = cmd_reg;
-	_cmd->rpt_id = 0x00;
-	_cmd->rpt_type = 0x00;
-	_cmd->opcode = 0x01;
-
-	if (i2c_transfer(adr, static_buf, sizeof(struct cmd), NULL, 0)) {
 		return 1;
 	}
 	return 0;

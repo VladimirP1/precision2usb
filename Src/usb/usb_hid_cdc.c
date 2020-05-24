@@ -706,6 +706,7 @@ void usb_hid_setup_units(struct prec_config_physinfo phys[2])
 void usb_init()
 {
 	rcc_periph_clock_enable(RCC_GPIOA);
+	rcc_periph_clock_enable(RCC_GPIOC);
 
 	/*
 	 * This is a somewhat common cheap hack to trigger device re-enumeration
@@ -716,6 +717,10 @@ void usb_init()
 	 * The magic delay is somewhat arbitrary, no guarantees on USBIF
 	 * compliance here, but "it works" in most places.
 	 */
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
+			GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
+	gpio_set(GPIOC, GPIO13);
+
 	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ,
 		GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
 	gpio_clear(GPIOA, GPIO12);
